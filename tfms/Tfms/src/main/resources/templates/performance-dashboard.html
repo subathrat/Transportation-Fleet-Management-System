@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Fleet Performance Dashboard - TFMS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+    <style>
+        :root {
+            --deep-navy: #003366; /* Primary Dark for Navbar/Headers */
+            --electric-indigo: #4D55CC; /* For buttons/accents */
+            --soft-violet: #7A73D1; /* Lighter accents */
+            --pastel-lavender: #B5A8D5; /* Very light accent */
+            --dashboard-bg: #f8f9fa; /* Light grey background */
+            --card-border: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--dashboard-bg);
+            color: #343a40;
+        }
+        .navbar {
+            background-color: var(--deep-navy);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .navbar-brand, .nav-link {
+            color: #ffffff !important;
+            font-weight: 500;
+        }
+        .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ffcc00 !important;
+            border-radius: 5px;
+        }
+        .container-fluid.sub-navbar {
+            background-color: #f0f2f5;
+            border-bottom: 1px solid var(--card-border);
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+        .main-dashboard-header {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        .main-dashboard-header h1 {
+            color: var(--deep-navy);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .main-dashboard-header p {
+            color: #6c757d;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        .btn-excel-download {
+            background-color: #28a745; /* Bootstrap success green */
+            border-color: #28a745;
+            font-size: 1.1rem;
+            padding: 12px 25px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .btn-excel-download:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        .card {
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            overflow: hidden; /* Ensures header corners are rounded */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-header {
+            background-color: var(--deep-navy); /* Default card header color */
+            color: white;
+            font-weight: 600;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-header.bg-primary { background-color: #007bff !important; }
+        .card-header.bg-success { background-color: #28a745 !important; }
+        .card-header.bg-info { background-color: #17a2b8 !important; }
+        .card-header.bg-warning { background-color: #ffc107 !important; } /* darker warning for text visibility */
+        .card-header.bg-secondary { background-color: #6c757d !important; }
+
+
+        .chart-container {
+            position: relative;
+            height: 350px; /* Fixed height for consistency */
+            width: 100%;
+            padding: 15px; /* Padding inside card body */
+        }
+        .table-responsive {
+            margin-top: 20px;
+        }
+        .table thead th {
+            background-color: var(--deep-navy);
+            color: white;
+            font-weight: 600;
+        }
+        .table tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #e9ecef;
+            cursor: pointer;
+        }
+
+        .footer {
+            background-color: var(--deep-navy);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            width: 100%;
+            margin-top: 50px;
+        }
+        .btn-logout {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    background-color: #dc3545; /* Bootstrap's default danger red */
+    color: white; /* White text for contrast */
+    border: 1px solid #dc3545;
+}
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand px-3" th:href="@{/home}"><i class="fa-solid fa-truck-fast"></i> <b>HOME</b></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link" th:href="@{/vehicles}">Vehicles</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/trips}">Trips</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/fuel}">Fuel</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/maintenances}">Maintenance</a></li>
+            <li class="nav-item"><a class="nav-link active" th:href="@{/performance}">Performance</a></li>
+        </ul>
+    </div>
+      <div class="collapse navbar-collapse" id="navbarNav">
+            <form th:action="@{/logout}" method="post" class="d-flex ms-auto">
+                <button type="submit" class="btn btn-logout"><i class="fa-solid fa-sign-out-alt me-2"></i> Logout</button>
+            </form>
+        </div>
+</nav>
+
+<div class="container-fluid sub-navbar mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-dark"><i class="bi bi-graph-up"></i> Fleet Performance Dashboard</h5>
+        <a th:href="@{/performance/report/excel}" class="btn btn-excel-download"><i class="bi bi-file-earmark-excel"></i> Download Excel Report</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="main-dashboard-header">
+        <h1><i class="bi bi-bar-chart-line-fill"></i> Comprehensive Fleet Performance Overview</h1>
+        <p>Analyze key metrics including operational costs, vehicle utilization, and fuel efficiency across your entire fleet. Get insights at a glance and download detailed reports.</p>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary">
+                    <i class="bi bi-currency-dollar"></i>
+                    <h5 class="mb-0">Total Operational Costs per Vehicle</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="operationalCostChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-success">
+                    <i class="bi bi-speedometer"></i>
+                    <h5 class="mb-0">Vehicle Activity & Utilization</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="activityUtilizationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-info">
+                    <i class="bi bi-fuel-pump"></i>
+                    <h5 class="mb-0">Fuel Efficiency (Average Cost per Liter)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="fuelEfficiencyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <i class="bi bi-droplet-fill"></i>
+                    <h5 class="mb-0">Total Fuel Quantity Consumed</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="totalFuelQuantityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-lg mt-5">
+        <div class="card-header bg-secondary">
+            <i class="bi bi-table"></i>
+            <h5 class="mb-0">Detailed Performance Data Table</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle">
+                    <thead>
+                    <tr>
+                        <th>Vehicle ID</th>
+                        <th>Registration No.</th>
+                        <th>Total Fuel (L)</th>
+                        <th>Total Fuel Cost (₹)</th>
+                        <th>Avg Cost/L (₹)</th>
+                        <th>Total Trips</th>
+                        <th>Trip Duration (Mins)</th>
+                        <th>Total Maintenance Cost (₹)</th> 
+                    </tr>
+                    </thead>
+                    <tbody id="performanceTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div> <footer class="footer">
+    <span>© 2025 Transport Fleet Management System</span>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const overallPerformanceData = /*[[${overallPerformanceDataJson}]]*/ '[]';
+    const data = JSON.parse(overallPerformanceData);
+
+    // Prepare data for charts
+    const vehicleLabels = data.map(v => v.registrationNumber);
+    const totalFuelCosts = data.map(v => v.totalFuelCost);
+    const totalMaintenanceCosts = data.map(v => v.totalMaintenanceCost);
+    const totalTrips = data.map(v => v.totalTrips);
+    const totalTripDurations = data.map(v => v.totalTripDurationMinutes);
+    const averageCostPerLiter = data.map(v => v.averageCostPerLiter);
+    const totalFuelQuantities = data.map(v => v.totalFuelQuantity);
+
+    // --- Color Palettes (More vibrant and distinct) ---
+    const primaryColor = 'rgba(0, 123, 255, 0.8)'; // Blue
+    const secondaryColor = 'rgba(255, 99, 132, 0.8)'; // Red
+    const successColor = 'rgba(40, 167, 69, 0.8)'; // Green
+    const infoColor = 'rgba(23, 162, 184, 0.8)'; // Teal
+    const warningColor = 'rgba(255, 193, 7, 0.8)'; // Yellow
+    const mutedColor = 'rgba(108, 117, 125, 0.8)'; // Grey
+
+    const borderPrimary = 'rgba(0, 123, 255, 1)';
+    const borderSecondary = 'rgba(255, 99, 132, 1)';
+    const borderSuccess = 'rgba(40, 167, 69, 1)';
+    const borderInfo = 'rgba(23, 162, 184, 1)';
+    const borderWarning = 'rgba(255, 193, 7, 1)';
+    const borderMuted = 'rgba(108, 117, 125, 1)';
+
+
+    // --- Chart 1: Total Operational Costs (Stacked Bar Chart) ---
+    const operationalCostCtx = document.getElementById('operationalCostChart').getContext('2d');
+    new Chart(operationalCostCtx, {
+        type: 'bar',
+        data: {
+            labels: vehicleLabels,
+            datasets: [
+                {
+                    label: 'Total Fuel Cost (₹)',
+                    data: totalFuelCosts,
+                    backgroundColor: primaryColor,
+                    borderColor: borderPrimary,
+                    borderWidth: 1
+                },
+                /* {
+                    label: 'Total Maintenance Cost (₹)',
+                    data: totalMaintenanceCosts,
+                    backgroundColor: secondaryColor,
+                    borderColor: borderSecondary,
+                    borderWidth: 1
+                }*/
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    stacked: true,
+                    title: {
+                        display: true,
+                        text: 'Vehicle Registration Number'
+                    }
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Cost (₹)'
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Fuel Costs per Vehicle'
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            }
+        }
+    });
+
+    // --- Chart 2: Vehicle Activity & Utilization (Bar for Trips, Line for Duration) ---
+    const activityUtilizationCtx = document.getElementById('activityUtilizationChart').getContext('2d');
+    new Chart(activityUtilizationCtx, {
+        type: 'bar', // Start with bar type
+        data: {
+            labels: vehicleLabels,
+            datasets: [
+                {
+                    label: 'Total Trips',
+                    data: totalTrips,
+                    backgroundColor: successColor,
+                    borderColor: borderSuccess,
+                    borderWidth: 1,
+                    yAxisID: 'y-trips'
+                },
+                {
+                    type: 'line', // This dataset will be a line
+                    label: 'Total Trip Duration (Mins)',
+                    data: totalTripDurations,
+                    backgroundColor: infoColor + '33', // Lighter fill for line
+                    borderColor: borderInfo,
+                    borderWidth: 2,
+                    fill: true, // Fill area under the line
+                    tension: 0.3, // Smooth curves
+                    yAxisID: 'y-duration'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Vehicle Registration Number'
+                    }
+                },
+                'y-trips': {
+                    type: 'linear',
+                    position: 'left',
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Trips'
+                    },
+                    grid: {
+                        drawOnChartArea: true // Only draw grid lines for this y-axis
+                    }
+                },
+                'y-duration': {
+                    type: 'linear',
+                    position: 'right', // Align this axis to the right side
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Duration (Minutes)'
+                    },
+                    grid: {
+                        drawOnChartArea: false // Do not draw grid lines for this y-axis
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Vehicle Trip Count vs. Duration'
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            }
+        }
+    });
+
+    // --- Chart 3: Fuel Efficiency (Average Cost per Liter) ---
+    const fuelEfficiencyCtx = document.getElementById('fuelEfficiencyChart').getContext('2d');
+    new Chart(fuelEfficiencyCtx, {
+        type: 'bar',
+        data: {
+            labels: vehicleLabels,
+            datasets: [
+                {
+                    label: 'Avg Cost per Liter (₹)',
+                    data: averageCostPerLiter,
+                    backgroundColor: 'rgba(255, 159, 64, 0.8)', // Orange
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Cost (₹)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Vehicle Registration Number'
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Average Fuel Cost per Liter for Each Vehicle'
+                }
+            }
+        }
+    });
+
+    // --- Chart 4: Total Fuel Quantity Consumed ---
+    const totalFuelQuantityCtx = document.getElementById('totalFuelQuantityChart').getContext('2d');
+    new Chart(totalFuelQuantityCtx, {
+        type: 'bar',
+        data: {
+            labels: vehicleLabels,
+            datasets: [
+                {
+                    label: 'Total Fuel Quantity (Liters)',
+                    data: totalFuelQuantities,
+                    backgroundColor: 'rgba(75, 192, 192, 0.8)', // Cyan
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Quantity (Liters)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Vehicle Registration Number'
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Total Fuel Quantity Consumed by Each Vehicle'
+                }
+            }
+        }
+    });
+
+
+    // --- Populate Detailed Performance Data Table ---
+    const performanceTableBody = document.getElementById('performanceTableBody');
+    if (performanceTableBody) {
+        data.forEach(vehicle => {
+            const row = performanceTableBody.insertRow();
+            row.insertCell().textContent = vehicle.vehicleId;
+            row.insertCell().textContent = vehicle.registrationNumber;
+            row.insertCell().textContent = vehicle.totalFuelQuantity.toFixed(2);
+            row.insertCell().textContent = vehicle.totalFuelCost.toFixed(2);
+            row.insertCell().textContent = vehicle.averageCostPerLiter.toFixed(2);
+            row.insertCell().textContent = vehicle.totalTrips;
+            row.insertCell().textContent = vehicle.totalTripDurationMinutes;
+            row.insertCell().textContent = vehicle.totalMaintenanceCost.toFixed(2);
+        });
+    }
+
+    /*]]>*/
+</script>
+</body>
+</html>

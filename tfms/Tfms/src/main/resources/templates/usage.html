@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Fuel Usage Records</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        /* Your original styles from index.html (Add Fuel Record) */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f6f9;
+        }
+        .navbar {
+            background-color: #003366; /* Your main dark blue navbar color */
+        }
+        .nav-link {
+            color: #ffffff !important;
+        }
+        .nav-link.active {
+            background-color: #ffffff44;
+            color: #ffcc00 !important;
+            font-weight: bold;
+        }
+        .container {
+            margin-top: 40px;
+        }
+        .card {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .btn-primary {
+            background-color: #00509e;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #003f7f;
+        }
+        h4 {
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: #003366;
+        }
+        .form-label {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        .btn-logout {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            background-color: #dc3545;
+            color: white;
+            border: 1px solid #dc3545;
+        }
+        .navbar.bg-dark-blue-custom {
+            background-color: #003366 !important;
+        }
+
+        /* --- Specific styles for the usage.html page --- */
+        .table-custom th {
+            background-color: #003366; /* Dark blue from your primary nav for table headers */
+            color: white;
+            vertical-align: middle;
+        }
+        .table-custom td {
+            vertical-align: middle;
+        }
+        .delete-button {
+            background-color: #dc3545; /* Red color, matching your logout button */
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .delete-button:hover {
+            background-color: #c82333; /* Slightly darker red on hover */
+        }
+        .success-message {
+            color: #155724; /* Dark green for success */
+            background-color: #d4edda; /* Light green background */
+            border-color: #c3e6cb;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            border-radius: 0.25rem;
+        }
+        .error-message {
+            color: #721c24; /* Dark red for error */
+            background-color: #f8d7da; /* Light red background */
+            border-color: #f5c6cb;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand px-3" th:href="@{/home}"><i class="fa-solid fa-truck-fast"></i> <b>HOME </b></a>
+    <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link" th:href="@{/vehicles}">Vehicles</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/trips}">Trips</a></li>
+            <li class="nav-item"><a class="nav-link active" th:href="@{/fuel}">Fuel</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/maintenances}">Maintenance</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/performance}">Performance</a></li>
+        </ul>
+
+        <form th:action="@{/logout}" method="post" class="d-flex ms-auto">
+            <button type="submit" class="btn btn-danger"><i class="fa-solid fa-sign-out-alt"></i> Logout</button>
+        </form>
+    </div>
+</nav>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark-blue-custom ">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#"><i class="bi bi-fuel-pump-fill"></i> Fuel Management</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#fuelNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="fuelNavbar">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/fuel}"><i class="bi bi-plus-circle"></i> Add Record</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" th:href="@{/usage}"><i class="bi bi-table"></i> View Usage</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10"> <div class="card p-4">
+            <h4 class="mb-3"><i class="bi bi-table"></i> Fuel Usage Records</h4>
+
+            <div th:if="${successMessage}" class="success-message">
+                <p th:text="${successMessage}"></p>
+            </div>
+            <div th:if="${errorMessage}" class="error-message">
+                <p th:text="${errorMessage}"></p>
+            </div>
+
+            <div th:if="${!fuelRecords.isEmpty()}">
+                <table class="table table-striped table-hover table-custom">
+                    <thead>
+                    <tr>
+                        <th>Fuel ID</th>
+                        <th>Vehicle Reg. No.</th>
+                        <th>Date</th>
+                        <th>Fuel Quantity (L)</th>
+                        <th>Cost (₹)</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="record : ${fuelRecords}">
+                        <td th:text="${record.fuelId}"></td>
+                        <td th:text="${record.registrationNumber}"></td>
+                        <td th:text="${#temporals.format(record.date, 'dd-MM-yyyy HH:mm')}"></td>
+                        <td th:text="${record.fuelQuantity}"></td>
+                        <td th:text="${record.cost}"></td>
+                        <td>
+                            <form th:action="@{/fuel/delete}" method="post" onsubmit="return confirm('Are you sure you want to delete this fuel record?');">
+                                <input type="hidden" name="fuelId" th:value="${record.fuelId}" />
+                                <button type="submit" class="delete-button">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div th:if="${fuelRecords.isEmpty()}" class="alert alert-info" role="alert">
+                No fuel records found. Add some records!
+            </div>
+
+            <div class="text-center mt-3">
+                <a th:href="@{/fuel}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Add New Fuel Record</a>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

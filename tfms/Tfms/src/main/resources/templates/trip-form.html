@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Add/Edit Trip - TFMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #001f3f; /* Navy Blue */
+            color: white;
+        }
+        .container {
+            max-width: 700px;
+            margin-top: 50px;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+            padding: 25px;
+            background: white;
+            color: #001f3f;
+        }
+        h2 {
+            text-align: center;
+            color: #001f3f;
+            font-weight: 600;
+        }
+        .form-label {
+            font-weight: bold;
+            color: #001f3f;
+        }
+        .form-control {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid #ccc;
+            color: #001f3f;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .btn-primary {
+            width: 48%;
+            background-color: #001f3f;
+            border: none;
+            font-weight: bold;
+        }
+        .btn-primary:hover {
+            background-color: #003366;
+        }
+        .btn-secondary {
+            width: 48%;
+            background-color: #cccccc;
+            border: none;
+            color: #001f3f;
+        }
+        .btn-secondary:hover {
+            background-color: #b3b3b3;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h2 th:text="${trip.tripId} != null ? 'Edit Trip' : 'Add Trip'">Trip Form</h2>
+
+        <form th:object="${trip}" th:action="@{/trips/save}" method="post">
+            <input type="hidden" th:field="*{tripId}" />
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="driverId" class="form-label">Driver ID</label>
+                    <input type="number" id="driverId" class="form-control" th:field="*{driverId}" placeholder="Enter Driver ID" min="0" required>
+                    <p class="error-message" th:if="${#fields.hasErrors('driverId')}" th:errors="*{driverId}"></p>
+                </div>
+
+                <div class="col-md-6">
+    <label for="vehicleId" class="form-label">Select Vehicle</label>
+    <select id="vehicleId" class="form-control" th:field="*{vehicleId}" required>
+        <option value="">-- Select a Vehicle --</option>
+        <option th:each="vehicle : ${availableVehicles}" th:value="${vehicle.vehicleId}" th:text="${vehicle.registrationNumber}"></option>
+    </select>
+    <p class="error-message" th:if="${#fields.hasErrors('vehicleId')}" th:errors="*{vehicleId}"></p>
+</div>
+            </div>
+
+          <div class="row mt-3">
+    <div class="col-md-6">
+        <label for="startLocation" class="form-label">Start Location</label>
+        <select id="startLocation" class="form-control" th:field="*{startLocation}" required>
+            <option value="">-- Select Start Location --</option>
+            <option th:each="city : ${cities}" th:value="${city}" th:text="${city}"></option>
+        </select>
+        <p class="error-message" th:if="${#fields.hasErrors('startLocation')}" th:errors="*{startLocation}"></p>
+    </div>
+    <div class="col-md-6">
+        <label for="endLocation" class="form-label">End Location</label>
+        <select id="endLocation" class="form-control" th:field="*{endLocation}" required>
+            <option value="">-- Select End Location --</option>
+            <option th:each="city : ${cities}" th:value="${city}" th:text="${city}"></option>
+        </select>
+        <p class="error-message" th:if="${#fields.hasErrors('endLocation')}" th:errors="*{endLocation}"></p>
+    </div>
+</div>
+
+
+          <!--   <div class="row mt-3">
+    <div class="col-md-6">
+        <label for="startTime" class="form-label">Start Time</label>
+        <input type="datetime-local" id="startTime" class="form-control" th:field="*{startTime}" required 
+               th:value="${trip.startTime}" th:min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd''T''HH:mm')}">
+        <p class="error-message" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}"></p>
+    </div>
+    <div class="col-md-6">
+        <label for="endTime" class="form-label">End Time</label>
+        <input type="datetime-local" id="endTime" class="form-control" th:field="*{endTime}" required 
+               th:value="${trip.endTime}" th:min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd''T''HH:mm')}">
+        <p class="error-message" th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}"></p>
+    </div>
+</div> --> 
+<div class="row mt-3">
+    <div class="col-md-6">
+        <label for="startTime" class="form-label">Start Time</label>
+        <input type="datetime-local" id="startTime" class="form-control" th:field="*{startTime}" required
+               th:min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd''T''HH:mm')}">
+        <p class="error-message" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}"></p>
+    </div>
+    <div class="col-md-6">
+        <label for="endTime" class="form-label">End Time</label>
+        <input type="datetime-local" id="endTime" class="form-control" th:field="*{endTime}" required
+               th:min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd''T''HH:mm')}">
+        <p class="error-message" th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}"></p>
+    </div>
+</div>
+            
+<div class="error-message text-danger text-center" th:if="${error}" th:text="${error}"></div>
+
+            <div class="btn-container">
+                <button type="submit" class="btn btn-primary">Save Trip</button>
+                <a th:href="@{/trips}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Fuel Record</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f6f9;
+        }
+        /* Main Navbar Color - This is already dark blue (#003366) */
+        .navbar {
+            background-color: #003366;
+        }
+        .nav-link {
+            color: #ffffff !important;
+        }
+        .nav-link.active {
+            background-color: #ffffff44;
+            color: #ffcc00 !important;
+            font-weight: bold;
+        }
+        .container {
+            margin-top: 40px;
+        }
+        .card {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .btn-primary {
+            background-color: #00509e;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #003f7f;
+        }
+        h4 {
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: #003366;
+        }
+        .form-label {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        .btn-logout {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            background-color: #dc3545;
+            color: white;
+            border: 1px solid #dc3545;
+        }
+        /* New style for the second navbar to make it dark blue */
+        .navbar.bg-dark-blue-custom { /* New class name to apply dark blue */
+            background-color: #003366 !important; /* Dark blue color */
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand px-3" th:href="@{/home}"><i class="fa-solid fa-truck-fast"></i> <b>HOME </b></a>
+    <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link" th:href="@{/vehicles}">Vehicles</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/trips}">Trips</a></li>
+            <li class="nav-item"><a class="nav-link active" th:href="@{/fuel}">Fuel</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/maintenances}">Maintenance</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/performance}">Performance</a></li>
+        </ul>
+
+        <form th:action="@{/logout}" method="post" class="d-flex ms-auto">
+            <button type="submit" class="btn btn-danger"><i class="fa-solid fa-sign-out-alt"></i> Logout</button>
+        </form>
+    </div>
+</nav>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark-blue-custom ">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#"><i class="bi bi-fuel-pump-fill"></i> Fuel Management</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#fuelNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="fuelNavbar">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" th:href="@{/fuel}"><i class="bi bi-plus-circle"></i> Add Record</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/usage}"><i class="bi bi-table"></i> View Usage</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card p-4">
+                <h4 class="mb-3"><i class="bi bi-pencil-square"></i> Add Fuel Record</h4>
+                <form th:action="@{/fuel/add}" method="post" th:object="${fuel}">
+                    <div class="mb-3">
+                        <label for="vehicleId" class="form-label"><i class="bi bi-truck"></i> Vehicle Registration Number</label>
+                        <select id="vehicleId" th:field="*{vehicleId}" class="form-control" required>
+                            <option value="">-- Select Vehicle --</option>
+                            <option th:each="vehicle : ${vehicles}"
+                                    th:value="${vehicle.vehicleId}"
+                                    th:text="${vehicle.registrationNumber}"></option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="datetime-local" class="form-control" id="date" th:field="*{date}" required
+                               th:min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd''T''HH:mm')}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="fuelQuantity" class="form-label"><i class="bi bi-fuel-pump"></i> Fuel Quantity (litres)</label>
+                        <input type="number" step="0.01" class="form-control" id="fuelQuantity" th:field="*{fuelQuantity}" min="1" required oninput="validateValue(this)">
+                    </div>
+                    <div class="mb-3">
+                        <label for="cost" class="form-label"><i class="bi bi-currency-rupee"></i> Cost (₹)</label>
+                        <input type="number" step="0.01" class="form-control" id="cost" th:field="*{cost}" min="1" required oninput="validateValue(this)">
+                    </div>
+
+                    <div class="error-message text-danger text-center" th:if="${error}" th:text="${error}"></div>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Add Record</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function validateValue(input) {
+        const value = parseFloat(input.value);
+        if (value <= 1 && input.value !== '') {
+            input.setCustomValidity('The entered value must be greater than 1.');
+        } else {
+            input.setCustomValidity('');
+        }
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

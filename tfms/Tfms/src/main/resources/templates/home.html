@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Home - TFMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Modern & Professional Color Palette */
+        :root {
+            --primary-dark-blue: #2c3e50; /* Deep Blue - for Navbar, strong text */
+            --accent-green: #2ecc71; /* Vibrant Green - for main actions */
+            --accent-orange: #e67e22; /* Warm Orange - for secondary actions */
+            --light-bg-start: #ecf0f1; /* Light Background - gradient start */
+            --light-bg-end: #bdc3c7; /* Light Background - gradient end */
+            --dark-text: #34495e; /* General Text */
+            --white: #ffffff;
+            --shadow-light: rgba(0, 0, 0, 0.1);
+            --shadow-strong: rgba(0, 0, 0, 0.25);
+            --shadow-vibrant: rgba(46, 204, 113, 0.5); /* For button hover glow */
+            --quote-border: #95a5a6; /* Silver gray for quote border */
+            --quote-accent: #3498db; /* Blue accent for quote */
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: linear-gradient(135deg, var(--light-bg-start) 0%, var(--light-bg-end) 100%);
+            color: var(--dark-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            position: relative; /* For background animation */
+        }
+
+        /* Animated Background Pattern */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle at center, rgba(255,255,255,0.05) 1px, transparent 1px), radial-gradient(circle at center, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            opacity: 0.8;
+            animation: moveBackground 60s linear infinite;
+            z-index: -1; /* Behind content */
+        }
+
+        @keyframes moveBackground {
+            from { background-position: 0 0, 20px 20px; }
+            to { background-position: 400px 400px, 420px 420px; }
+        }
+
+        /* --- Navbar Styling --- */
+        .navbar {
+            background-color: var(--primary-dark-blue);
+            box-shadow: 0 4px 20px var(--shadow-strong);
+            padding: 1rem 0;
+            z-index: 10; /* Ensure navbar is above other elements */
+        }
+
+        .navbar-brand {
+            color: var(--white) !important;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            transition: color 0.3s ease;
+        }
+        .navbar-brand:hover {
+            color: var(--accent-green) !important;
+        }
+
+        .navbar-brand .fa-truck-fast {
+            color: var(--accent-green);
+            margin-right: 12px;
+            font-size: 2.5rem; /* Larger icon */
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Bounce effect */
+        }
+        .navbar-brand:hover .fa-truck-fast {
+            transform: scale(1.2) rotate(8deg);
+        }
+
+        .btn-logout {
+            background-color: #e74c3c; /* Flat Red */
+            border: none;
+            font-weight: 600;
+            padding: 0.6rem 1.2rem;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .btn-logout:hover {
+            background-color: #c0392b;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        }
+
+        /* --- Main Content & Hero Section --- */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 70px 40px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 25px;
+            backdrop-filter: blur(12px); /* Stronger blur effect */
+            box-shadow: 0 15px 40px var(--shadow-strong);
+            animation: fadeInScale 1s ease-out forwards;
+            max-width: 950px;
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.3); /* Subtle border for glass effect */
+        }
+
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: translateY(50px) scale(0.9); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .hero h1 {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--primary-dark-blue);
+            font-size: 3.8rem;
+            font-weight: 700;
+            margin-bottom: 40px; /* Increased margin for quote */
+            text-shadow: 2px 2px 5px var(--shadow-light);
+        }
+
+        /* Quote Decoration */
+        .hero .quote-text {
+            font-family: 'Open Sans', sans-serif;
+            color: var(--dark-text);
+            font-size: 1.4rem;
+            line-height: 1.6;
+            max-width: 700px;
+            margin: 0 auto 50px auto; /* Centered with bottom margin */
+            padding: 30px 40px; /* Increased padding */
+            border-left: 6px solid var(--quote-accent); /* Stronger left border */
+            border-right: 6px solid var(--quote-accent); /* Stronger right border */
+            border-radius: 12px; /* Slightly more rounded corners */
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(240, 240, 240, 0.7)); /* Subtle gradient background */
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12); /* More pronounced shadow */
+            font-weight: 600;
+            position: relative;
+            font-style: italic;
+            text-align: center; /* Ensure text inside quote is centered */
+        }
+        .hero .quote-text::before,
+        .hero .quote-text::after {
+            font-family: 'Montserrat', sans-serif; /* Use Montserrat for quotes */
+            font-size: 4em; /* Larger quotes */
+            color: var(--quote-accent);
+            position: absolute;
+            opacity: 0.7;
+            animation: fadeIn 1s ease-out forwards; /* Fade in animation */
+        }
+        .hero .quote-text::before {
+            content: "\201C";
+            top: -15px; /* Adjust vertical position */
+            left: 10px;
+        }
+        .hero .quote-text::after {
+            content: "\201D";
+            bottom: -25px; /* Adjust vertical position */
+            right: 10px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 0.7; transform: translateY(0); }
+        }
+
+
+        /* --- Action Buttons Grid --- */
+        .action-buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+            justify-items: center; /* Center items within their grid cells */
+            align-items: stretch; /* Stretch items vertically to fill grid cells */
+        }
+
+        .action-button {
+            border: none;
+            padding: 30px 20px;
+            background: var(--accent-green);
+            color: var(--white);
+            border-radius: 18px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            transition: all 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column; /* Stack icon and text */
+            align-items: center; /* **THIS IS KEY: Centers icon and text horizontally within the button** */
+            justify-content: center; /* **Centers content vertically (icon + text block)** */
+            text-decoration: none;
+            box-shadow: 0 8px 20px var(--shadow-vibrant);
+            width: 100%;
+            min-height: 200px; /* Crucial for consistent button height */
+            max-width: 280px;
+            text-align: center; /* Ensure text content itself is centered if it wraps */
+        }
+
+        .action-button i {
+            font-size: 4.5rem;
+            margin-bottom: 15px; /* Spacing between icon and text */
+            color: rgba(255, 255, 255, 0.95);
+            filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.4));
+            flex-shrink: 0; /* Prevent icon from shrinking */
+        }
+
+        .action-button span {
+            display: block; /* Ensure span takes full width for text-align */
+            text-align: center; /* Ensure text is centered within its span */
+            line-height: 1.3;
+            /* flex-grow removed, as justify-content: center on parent handles vertical alignment */
+        }
+
+        .action-button:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 18px 35px var(--shadow-vibrant);
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: var(--white);
+        }
+
+        /* Specific Button Colors for Variety */
+        .action-button.vehicles { background: #3498db; box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4); }
+        .action-button.vehicles:hover { background: linear-gradient(45deg, #2980b9, #3498db); box-shadow: 0 18px 35px rgba(52, 152, 219, 0.6); }
+
+        .action-button.trips { background: #9b59b6; box-shadow: 0 8px 20px rgba(155, 89, 182, 0.4); }
+        .action-button.trips:hover { background: linear-gradient(45deg, #8e44ad, #9b59b6); box-shadow: 0 18px 35px rgba(155, 89, 182, 0.6); }
+
+        .action-button.fuel { background: #f1c40f; box-shadow: 0 8px 20px rgba(241, 196, 15, 0.4); }
+        .action-button.fuel:hover { background: linear-gradient(45deg, #f39c12, #f1c40f); box-shadow: 0 18px 35px rgba(241, 196, 15, 0.6); }
+        .action-button.fuel i { color: rgba(255, 255, 255, 0.95); }
+
+        .action-button.maintenance { background: #e67e22; box-shadow: 0 8px 20px rgba(230, 126, 34, 0.4); }
+        .action-button.maintenance:hover { background: linear-gradient(45deg, #d35400, #e67e22); box-shadow: 0 18px 35px rgba(230, 126, 34, 0.6); }
+
+        .action-button.performance { background: #1abc9c; box-shadow: 0 8px 20px rgba(26, 188, 156, 0.4); }
+        .action-button.performance:hover { background: linear-gradient(45deg, #16a085, #1abc9c); box-shadow: 0 18px 35px rgba(26, 188, 156, 0.6); }
+
+
+        /* --- Footer Styling --- */
+        .footer {
+            background-color: var(--primary-dark-blue);
+            color: var(--white);
+            padding: 25px 0;
+            text-align: center;
+            margin-top: auto;
+            box-shadow: 0 -4px 20px var(--shadow-strong);
+            font-size: 0.95rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 3.2rem;
+            }
+            .hero .quote-text {
+                font-size: 1.25rem;
+                padding: 20px 30px;
+            }
+            .hero .quote-text::before,
+            .hero .quote-text::after {
+                font-size: 3.5em;
+            }
+            .action-buttons-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+            .action-button {
+                font-size: 1.2rem;
+                padding: 25px 15px;
+                min-height: 180px;
+            }
+            .action-button i {
+                font-size: 4rem;
+                margin-bottom: 12px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.7rem;
+            }
+            .navbar-brand .fa-truck-fast {
+                font-size: 2rem;
+            }
+            .hero {
+                padding: 50px 25px;
+            }
+            .hero h1 {
+                font-size: 2.5rem;
+                margin-bottom: 20px;
+            }
+            .hero .quote-text {
+                font-size: 1.1rem;
+                padding: 18px 25px;
+                margin-bottom: 30px;
+            }
+            .hero .quote-text::before,
+            .hero .quote-text::after {
+                font-size: 3em;
+            }
+            .action-buttons-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+            .action-button {
+                font-size: 1.1rem;
+                padding: 20px 10px;
+                min-height: 170px;
+            }
+            .action-button i {
+                font-size: 3.5rem;
+                margin-bottom: 10px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+            .navbar-brand .fa-truck-fast {
+                font-size: 1.8rem;
+            }
+            .hero {
+                padding: 40px 15px;
+                border-radius: 15px;
+            }
+            .hero h1 {
+                font-size: 2rem;
+                margin-bottom: 15px;
+            }
+            .hero .quote-text {
+                font-size: 0.95rem;
+                padding: 15px 20px;
+                margin-bottom: 25px;
+            }
+            .hero .quote-text::before,
+            .hero .quote-text::after {
+                font-size: 2.5em;
+                top: 0px;
+                bottom: -10px;
+            }
+            .action-buttons-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            .action-button {
+                max-width: 90%;
+                margin: 0 auto;
+                font-size: 1rem;
+                padding: 15px 10px;
+                border-radius: 12px;
+                min-height: 150px;
+            }
+            .action-button i {
+                font-size: 3rem;
+                margin-bottom: 8px;
+            }
+            .btn-logout {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#"><i class="fa-solid fa-truck-fast"></i> TFMS</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <form th:action="@{/logout}" method="post" class="d-flex ms-auto">
+                <button type="submit" class="btn btn-logout"><i class="fa-solid fa-sign-out-alt me-2"></i> Logout</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="main-content">
+    <div class="hero">
+        <h1>Welcome to Transport Fleet Management System</h1>
+        <p class="quote-text">Your comprehensive solution to optimize and streamline all your fleet operations with precision and ease. Take control of your logistics like never before.</p>
+
+        <div class="action-buttons-grid">
+            <a class="action-button vehicles" th:href="@{/vehicles}">
+                <i class="fa-solid fa-truck-moving"></i>
+                <span>Manage Vehicles</span>
+            </a>
+            <a class="action-button trips" th:href="@{/trips}">
+                <i class="fa-solid fa-route"></i>
+                <span>Schedule & Track Trips</span>
+            </a>
+            <a class="action-button fuel" th:href="@{/fuel}">
+                <i class="fa-solid fa-gas-pump"></i>
+                <span>Monitor Fuel Usage</span>
+            </a>
+            <a class="action-button maintenance" th:href="@{/maintenances}">
+                <i class="fa-solid fa-wrench"></i>
+                <span>Vehicle Maintenance</span>
+            </a>
+            <a class="action-button performance" th:href="@{/performance}">
+                <i class="fa-solid fa-chart-line"></i>
+                <span>Performance Analytics</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <span>&copy; 2025 Transport Fleet Management System. All rights reserved.</span>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
